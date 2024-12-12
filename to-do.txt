@@ -1,0 +1,1 @@
+1.  quick script to check for new and obsolete config files
