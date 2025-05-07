@@ -1,91 +1,122 @@
-# VPN Rotation Script for Dragon Village Link Views
+# 🐉 CrackedUp View Count Script
 
-This script allows you to rotate through multiple VPN servers (using `.ovpn` files) to automate view clicks on Dragon Village links. The script logs used VPN servers and the number of views generated for each link, allowing you to skip previously used VPN configurations for a specific link.
+This script automates VPN rotation to increase views on Dragon Village Collection (DVC) eggs or hatchlings using AirVPN. It ensures views are only counted once per IP, logs which servers have been used, and supports live view scraping and personality-based targeting.
 
-## Features
+---
 
-- **Rotate VPN servers**: Connect to a list of VPNs using `.ovpn` files and click a Dragon Village link to generate views.
-- **Track views**: Keep track of how many views each Dragon Village link has received from the program.
-- **Skip used VPNs**: Ensure VPN configurations are not reused for the same link.
-- **Skip failed servers**: Automatically skip VPN servers that fail to connect.
-- **Clear logs**: Options to clear the VPN usage log and the skip list.
+## 🚀 Features
 
-## Requirements
+- ✅ **Live view count scraping** from DVC share links
+- ✅ **Personality goal targeting** (e.g., Silent, Lovely, Arrogant)
+- ✅ **Rainbow spinner** while connecting to VPN
+- ✅ **AirVPN server health checks** via official API
+- ✅ **SQLite database logging** for clicks and skipped servers
+- ✅ **Skips unhealthy or failed VPN servers**
+- ✅ **Graceful shutdown** with automatic `sudo hummingbird --recover-network`
 
-- Python 3.9+
-- Hummingbird (AirVPN's OpenVPN3 client)
-- OpenVPN configuration files (`.ovpn`)
-- Requests library (`pip install requests`)
+---
 
-## How to Use
+## 📦 Requirements
 
-### Running the Script
-
-First, activate your virtual environment by running:
+Install dependencies:
 
 ```bash
-source venv/bin/activate
+pip install -r requirements.txt
 ```
-To run the script:
+
+Minimal `requirements.txt`:
+
+```
+requests
+beautifulsoup4
+python-dotenv
+pandas
+tabulate
+```
+
+---
+
+## 🛠 Setup
+
+1. Clone the repo and enter the directory
+2. Place your `.ovpn` config files into the `configs/` folder
+3. Create a `.env` file in the project root with:
+
+```env
+AIRVPN_API_KEY=your_api_key_here
+```
+
+4. Run the DB initializer:
 
 ```bash
-python view_count.py
+python db/init_db.py
+python db/sync_servers.py
 ```
 
-### Input Parameters
+(Optional: `python db/migrations/add_personality_fields.py` if needed)
 
-- **Dragon Village Link**: The script will prompt you to input the Dragon Village view link.
-- **Number of Views**: The script will prompt you to input the number of views you want to generate.
+---
 
-If the link has been used before, the script will tell you how many views it has already received and ask how many additional views you want.
-
-To exit at any time, press Ctrl + C.
-
-### Commands
-
-#### Clear VPN Usage Log
-
-Use this command to clear the VPN usage log. This is useful if old links are no longer needed because dragons grow up after a few days:
-
-```bash
-python vpn_rotation.py --clearvpnlog
-```
-
-#### Clear Skip List
-
-Use this command to clear the skip list, which contains VPN servers that previously failed to connect:
-
-```bash
-python vpn_rotation.py --clearskiplist
-```
-
-#### Show Skip List
-
-Use this command to show all VPN servers that are in the skip list (i.e., servers that failed to connect in the past):
-
-```bash
-python vpn_rotation.py --showskiplist
-```
-
-## Logging
-
-- **VPN Usage Log**: The script logs which `.ovpn` files have been used for each Dragon Village link and the number of views generated. This data is stored in `vpn_usage_log.json`.
-- **Skip List**: If a VPN connection fails, the VPN server is added to the skip list, stored in `skip_list.json`.
-
-## Example
-
-Here is an example of running the script:
+## 🧪 Usage
 
 ```bash
 python view_count.py
-Enter the Dragon Village link: https://dragon.dvc.land/view/eu?id=12345
-Enter the number of views you want: 10
 ```
 
-The script will rotate through the `.ovpn` files in the `configs/` directory, connect to each one, and generate views for the Dragon Village link.
+You’ll be prompted to:
 
-## Future Improvements
+- Enter a DVC share link (e.g. https://dragon.dvc.land/view/us?id=...)
+- Choose a personality (e.g. `cute`, `lovely`, `silent`) or manually enter a view target
+- Watch the rainbow spinner work its magic 🌈
 
-- Log the connection time for each VPN server and the total runtime of the script.
-- Further optimization of the connection logic.
-- Command to verify existing AirVPN servers and matching OVPN files and rename them if necessary.
+The script will:
+
+- Rotate through working AirVPN servers
+- Skip unhealthy or previously used ones
+- Stop when the desired number of views is reached
+
+---
+
+## 🔍 CLI Tools
+
+```bash
+python db/browse_db.py
+```
+
+- View logs, skipped servers, and click history
+
+More CLI tools coming soon!
+
+---
+
+## 🎯 Supported Personalities
+
+These personalities are view-based:
+
+| Personality   | View Requirement | Notes |
+|---------------|------------------|-------|
+| Silent        | Exactly 0        | |
+| Solitary      | Exactly 1        | |
+| Reserved      | 5–9              | |
+| Mischievous   | 50–99            | |
+| Lousy         | 95–99            | |
+| Friendly      | 100+             | Requires set as partner + village visits |
+| Extroverted   | 100+             | Partner activity required |
+| Cute          | Exactly 199      | Nickname, 99 EV total, no STR, incubator |
+| Lovely        | 200+             | |
+| Arrogant      | 200+             | Requires all EVs ≥ 25 |
+
+*Your script adjusts view counts accordingly and will stop when the target is reached.*
+
+---
+
+## ❤️ Credits
+
+Created by Ari Flowers — view automation for cute digital dragons 🐉  
+Supports AirVPN + Dragon Village Collection
+
+---
+
+## 📜 License
+
+MIT License
