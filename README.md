@@ -60,20 +60,48 @@ python db/sync_servers.py
 ## 🧪 Usage
 
 ```bash
-python view_count.py
+python view_count.py [options]
 ```
 
-You’ll be prompted to:
+---
 
-- Enter a DVC share link (e.g. https://dragon.dvc.land/view/us?id=...)
-- Choose a personality (e.g. `cute`, `lovely`, `silent`) or manually enter a view target
-- Watch the rainbow spinner work its magic 🌈
+### ⚙️ Command-Line Flags
 
-The script will:
+| Flag              | Type     | Description                                                  |
+|-------------------|----------|--------------------------------------------------------------|
+| `--link`          | `str`    | The DVC dragon share link to automate views for             |
+| `--personality`   | `str`    | Target a specific personality (e.g. `cute`, `lovely`, `sil`)|
+| `--views`         | `int`    | Manually override total view target (bypasses personality)  |
+| `--limit`         | `int`    | Maximum number of views to add during this run              |
+| `--dry-run`       | flag     | Simulate the run without making real HTTP requests          |
 
-- Rotate through working AirVPN servers
-- Skip unhealthy or previously used ones
-- Stop when the desired number of views is reached
+---
+
+### 🧠 Examples
+
+#### 🎯 Target a personality with automatic view goal:
+```bash
+python view_count.py --link https://dragon.dvc.land/view/us?id=abc123 --personality cute
+```
+
+#### 🔢 Manually request 50 views:
+```bash
+python view_count.py --link https://dragon.dvc.land/view/us?id=abc123 --views 50
+```
+
+#### 🧪 Test safely without clicking:
+```bash
+python view_count.py --link https://dragon.dvc.land/view/us?id=abc123 --views 20 --dry-run
+```
+
+#### 🔐 Limit to 3 views this run:
+```bash
+python view_count.py --link https://dragon.dvc.land/view/us?id=abc123 --personality lovely --limit 3
+```
+
+---
+
+You can still run the script without flags and it will guide you interactively.
 
 ---
 
@@ -96,17 +124,17 @@ These personalities are view-based:
 | Personality   | View Requirement | Notes |
 |---------------|------------------|-------|
 | Silent        | Exactly 0        | |
-| Solitary      | Exactly 1        | |
-| Reserved      | 5–9              | |
-| Mischievous   | 50–99            | |
-| Lousy         | 95–99            | |
-| Friendly      | 100+             | Requires set as partner + village visits |
-| Extroverted   | 100+             | Partner activity required |
-| Cute          | Exactly 199      | Nickname, 99 EV total, no STR, incubator |
-| Lovely        | 200+             | |
+| Solitary      | Exactly 1        | Views === 1, all EVs end with 1 |
+| Reserved      | 5–9              | Views = 5-9, incubator |
+| Mischievous   | 50–99            | Each EV is different and ends with 9, no sickness |
+| Lousy         | 95–99            | Views = 95-99 |
+| Friendly      | 100+             | Views ≥ 100, nickname, cares "Good!" or higher |
+| Extroverted   | 100+             | Views ≥ 100, set as partner and visit 30+ villages |
+| Cute          | Exactly 199      | Nickname, 99 EV total, no STR, incubator, no sickness |
+| Lovely        | 300+             | Views ≥ 300|
 | Arrogant      | 200+             | Requires all EVs ≥ 25 |
 
-*Your script adjusts view counts accordingly and will stop when the target is reached.*
+*The script adjusts view counts accordingly and will stop when the target is reached.*
 
 ---
 

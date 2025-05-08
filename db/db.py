@@ -1,10 +1,17 @@
 import sqlite3
 from datetime import datetime
+import os
+from dotenv import load_dotenv
 
-DB_PATH = "vpn_rotation.db"
+load_dotenv()
+DB_PATH = os.getenv("DB_PATH", "vpn_rotation.db")
 
 def connect():
     return sqlite3.connect(DB_PATH)
+
+# ----------------------------
+# Server Table
+# ----------------------------
 
 def upsert_server(name, country=None, city=None, health=None, skip=False, skip_reason=None):
     conn = connect()
@@ -40,6 +47,10 @@ def mark_server_skipped(name, reason="manual"):
     """, (reason, datetime.utcnow().isoformat(), name))
     conn.commit()
     conn.close()
+
+# ----------------------------
+# Click Logs
+# ----------------------------
 
 def log_click(dragon_link, server_name, success=True):
     conn = connect()
@@ -81,3 +92,34 @@ def get_used_servers_for_link(link):
     results = {row[0] for row in cursor.fetchall()}
     conn.close()
     return results
+
+# ----------------------------
+# Dragon Link Personality Goals
+# ----------------------------
+
+def get_dragon_link_data(link):
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT personality_goal, target_views
+        FROM dragon_links
+        WHERE link = ?
+    """, (link,))
+    result = cursor.fetchone()
+    conn.close()
+    if result:
+        return {"personality_goal": result[0], "target_views": result[1]}
+    return None
+
+def upsert_dragon_link(link, personality_goal=None, target_views=None):
+    conn = connect()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO dragon_links (link, personality_goal, target_views)
+        VALUES (?, ?, ?)
+        ON CONFLICT(link) DO UPDATE SET
+            personality_goal = excluded.personality_goal,
+            target_views = excluded.target_views
+    """, (link, personality_goal, target_views))
+    conn.commit()
+    conn.close()

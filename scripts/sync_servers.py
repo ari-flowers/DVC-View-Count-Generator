@@ -1,6 +1,11 @@
 import os
 import re
-from db import upsert_server  # Make sure db.py is in the same directory or PYTHONPATH
+import sys
+
+# Add the root of the project to the path so we can import from db/
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+from db.db import upsert_server
 
 CONFIG_DIR = "configs/"
 
@@ -30,7 +35,7 @@ def sync_servers_from_ovpn():
                 skip=False,
                 skip_reason=None
             )
-            print(f"✅ Synced server: {server} ({country}-{city})")
+            # print(f"✅ Synced server: {server} ({country}-{city})")
             added += 1
         else:
             print(f"⚠️ Could not parse: {f}")

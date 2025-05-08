@@ -1,7 +1,12 @@
+import os
+from dotenv import load_dotenv
 import sqlite3
 
+load_dotenv()
+DB_PATH = os.getenv("DB_PATH", "vpn_rotation.db")
+
 # Connect to the database
-conn = sqlite3.connect("vpn_rotation.db")
+conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
 # Create tables

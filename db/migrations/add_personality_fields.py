@@ -1,7 +1,12 @@
+import os
+from dotenv import load_dotenv
 import sqlite3
 
+load_dotenv()
+DB_PATH = os.getenv("DB_PATH", "vpn_rotation.db")
+
 def migrate():
-    conn = sqlite3.connect("vpn_rotation.db")
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
 
     # Add 'personality_goal' column if it doesn't exist
