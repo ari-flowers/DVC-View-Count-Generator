@@ -63,48 +63,64 @@ def rotate_vpns(dragon_link, target_views, live_views, args):
 
     used_servers = get_used_servers_for_link(dragon_link)
     usable_servers = set(get_usable_servers())
+    config_files = get_config_files(usable_servers)
 
-    config_files = [
-        f for f in os.listdir("configs/")
-        if f.endswith(".ovpn") and extract_server_name(f) in usable_servers
-    ]
-    
     for config_file in config_files:
         server_name = extract_server_name(config_file)
-        print(f"🔍 Checking config: {config_file} → Server: {server_name}")
+        print(f"\U0001F50D Checking config: {config_file} → Server: {server_name}")
 
-        if server_name in used_servers:
+        if server_name in used_servers or current_views >= remaining_views:
             continue
 
-        if current_views >= remaining_views:
-            break
-
-        vpn_process = connect_to_vpn(config_file)
-
-        if vpn_process:
-            current_ip = get_current_ip()
-            if current_ip and current_ip != personal_ip:
-                print(f"🌐 VPN IP: {current_ip}")
-                if args.dry_run:
-                    print(f"🔎 [Dry Run] Skipping click for {dragon_link} via {server_name}")
-                    log_click(dragon_link, server_name, success=False)
-                else:
-                    if click_dragon_village_link(dragon_link):
-                        current_views += 1
-                        print(f"👀 Views: {live_views + current_views}/{target_views}")
-                        log_click(dragon_link, server_name, success=True)
-                        used_servers.add(server_name)
-                    else:
-                        print(f"❌ View failed via {server_name}")
-                        log_click(dragon_link, server_name, success=False)
-            disconnect_vpn(vpn_process)
+        if attempt_view_with_server(dragon_link, server_name, config_file, args):
+            current_views += 1
+            used_servers.add(server_name)
+            print(f"👀 Views: {live_views + current_views}/{target_views}")
 
     if current_views < remaining_views:
-        print(f"\n⚠️ Reached the end of available VPN servers before hitting the full target.")
+        print("\n⚠️ Reached the end of available VPN servers before hitting the full target.")
         print(f"📈 Views added: {current_views} / {remaining_views}")
         print("💡 Consider using in-game tools like Sea Creature Calling or View Count Amulets to reach the goal.")
 
     return current_views
+
+
+def get_config_files(usable_servers):
+    return [
+        f for f in os.listdir("configs/")
+        if f.endswith(".ovpn") and extract_server_name(f) in usable_servers
+    ]
+
+
+def attempt_view_with_server(dragon_link, server_name, config_file, args):
+    global vpn_process
+    vpn_process = connect_to_vpn(config_file)
+
+    if not vpn_process:
+        return False
+
+    current_ip = get_current_ip()
+    if not current_ip or current_ip == personal_ip:
+        disconnect_vpn(vpn_process)
+        return False
+
+    print(f"🌐 VPN IP: {current_ip}")
+
+    if args.dry_run:
+        print(f"🔎 [Dry Run] Skipping click for {dragon_link} via {server_name}")
+        log_click(dragon_link, server_name, success=False)
+        disconnect_vpn(vpn_process)
+        return False
+
+    success = click_dragon_village_link(dragon_link)
+    log_click(dragon_link, server_name, success=success)
+    disconnect_vpn(vpn_process)
+
+    if not success:
+        print(f"❌ View failed via {server_name}")
+        return False
+
+    return True
 
 # Summary Output
 def print_summary(link, personality, target, start_views, added, start_time, end_time, dry_run):
