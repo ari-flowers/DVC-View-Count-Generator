@@ -11,15 +11,6 @@ PERSONALITY_VIEW_TARGETS = {
     "Arrogant": 200,
 }
 
-def apply_lovely_bonus(default_target=300):
-    has_bonus = input("💬 Are you using Sea Creature Calling or a View Count Amulet? (y/n): ").strip().lower()
-    if has_bonus == 'y':
-        print("🐠 Adjusted target to 200 views based on in-game bonus.")
-        return 200
-    else:
-        print("⚠️ Max achievable views may fall short of 300. You’ll need to supplement the rest. Good luck, tamer!")
-        return default_target
-
 def match_personality_input(user_input, personality_dict):
     user_input = user_input.lower()
     matches = [
@@ -39,13 +30,23 @@ def match_personality_input(user_input, personality_dict):
             print(f" - {key}")
         return None
 
-def resolve_personality_goal(user_input):
-    """Returns (personality_name, target_views) or (None, None) on failure."""
+def resolve_personality_goal(user_input, current_views=0):
+    """Returns (personality_name, target_views, bonus_used) or (None, None, None) on failure."""
     matched = match_personality_input(user_input, PERSONALITY_VIEW_TARGETS)
     if not matched:
-        return None, None
-    if matched == "Lovely":
-        target_views = apply_lovely_bonus()
+        return None, None, None
+
+    base_target = PERSONALITY_VIEW_TARGETS[matched]
+    remaining = base_target - current_views
+
+    if base_target > 100 and remaining > 100:
+        has_bonus = input(f"💬 Are you using Sea Creature Calling or a View Count Amulet for '{matched}'? (y/n): ").strip().lower()
+        if has_bonus == 'y':
+            new_target = base_target - 100
+            print(f"🐠 Adjusted target to {new_target} views based on in-game bonus.")
+            return matched, new_target, True
+        else:
+            print(f"⚠️ Max achievable views may fall short of {base_target}. You’ll need to supplement the rest. Good luck, tamer!")
+            return matched, base_target, False
     else:
-        target_views = PERSONALITY_VIEW_TARGETS[matched]
-    return matched, target_views
+        return matched, base_target, False
